@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="Torion.Api/Torion.Api.csproj" />
+  <Project Path="Torion.Application/Torion.Application.csproj" Id="d6794206-3002-420a-ae91-300a06ee136b" />
+  <Project Path="Torion.Domain/Torion.Domain.csproj" Id="8e0a65ae-f79c-4804-9f94-b3432c70766b" />
+  <Project Path="Torion.Infrastructure/Torion.Infrastructure.csproj" Id="11b2f1bb-c3d0-455e-a56c-58e9c114df80" />
+  <Project Path="Torion.Persistence/Torion.Persistence.csproj" Id="f2c22dd4-3272-4257-ac40-454a7fec06f7" />
+  <Project Path="Torion.Presentation/Torion.Presentation.csproj" Id="68769dce-a75b-4ea2-98d9-6787c5b93796" />
+</Solution>
