@@ -4,7 +4,10 @@ using System.Text;
 
 namespace Torion.Domain.Enumerations
 {
-    internal class AnimalStatus
+    public enum AnimalStatus
     {
+        Alive = 1,
+        Sold = 2,
+        Dead = 3
     }
 }

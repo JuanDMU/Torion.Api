@@ -4,7 +4,9 @@ using System.Text;
 
 namespace Torion.Domain.Enumerations
 {
-    internal class HerdStatus
+    public enum HerdStatus
     {
+        Active = 1,
+        Inactive = 2
     }
 }

@@ -4,7 +4,10 @@ using System.Text;
 
 namespace Torion.Domain.Enumerations
 {
-    internal class DoseUnit
+    public enum DoseUnit
     {
+        Ml = 1,
+        Mg = 2,
+        Cc = 3
     }
 }

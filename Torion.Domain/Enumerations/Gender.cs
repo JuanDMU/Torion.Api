@@ -4,7 +4,9 @@ using System.Text;
 
 namespace Torion.Domain.Enumerations
 {
-    internal class Gender
+    public enum Gender
     {
+        Male = 1,
+        Female = 2
     }
 }

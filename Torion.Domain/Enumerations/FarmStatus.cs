@@ -4,7 +4,9 @@ using System.Text;
 
 namespace Torion.Domain.Enumerations
 {
-    internal class FarmStatus
+    public enum FarmStatus
     {
+        Active = 1,
+        Inactive = 2
     }
 }
