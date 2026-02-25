@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using Torion.Domain.Base;
 using Torion.Domain.Enumerations;
 using Torion.Domain.ValueObjects;
@@ -10,6 +10,7 @@ namespace Torion.Domain.Entities
     public sealed class Animal : BaseEntity
     {
         private readonly List<WeightRecord> _weightRecords = new();
+        private readonly List<VaccineAnimal> _vaccines = new();
 
         public int FarmId { get; private set; }
 
@@ -26,6 +27,8 @@ namespace Torion.Domain.Entities
         public AnimalStatus Status { get; private set; }
 
         public IReadOnlyCollection<WeightRecord> WeightRecords => _weightRecords.AsReadOnly();
+
+        public IReadOnlyCollection<VaccineAnimal> Vaccines => _vaccines.AsReadOnly();
 
         private Animal() { } // EF Core
 
@@ -76,6 +79,34 @@ namespace Torion.Domain.Entities
 
             var record = WeightRecord.Create(Id, date.Date, weight, notes);
             _weightRecords.Add(record);
+
+            SetUpdated();
+        }
+
+        public void ApplyVaccine(int vaccineId, Dose dose, DateTime applicationDate, string? notes)
+        {
+            if (vaccineId <= 0)
+                throw new ArgumentException("VaccineId must be valid.");
+
+            if (applicationDate.Date > DateTime.UtcNow.Date)
+                throw new ArgumentException("Application date cannot be in the future.");
+
+            if (_vaccines.Any(v =>
+                v.VaccineId == vaccineId &&
+                v.ApplicationDate.Date == applicationDate.Date))
+            {
+                throw new InvalidOperationException(
+                    "This vaccine has already been applied to this animal on the same date.");
+            }
+
+            var vaccine = VaccineAnimal.Create(
+                Id,
+                vaccineId,
+                dose,
+                applicationDate.Date,
+                notes);
+
+            _vaccines.Add(vaccine);
 
             SetUpdated();
         }
