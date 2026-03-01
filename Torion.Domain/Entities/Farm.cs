@@ -66,8 +66,13 @@ namespace Torion.Domain.Entities
             Weight initialWeight,
             DateTime admissionDate)
         {
-            if (!_herds.Any(h => h.Id == herdId))
+            var herd = _herds.FirstOrDefault(h => h.Id == herdId);
+
+            if (herd is null)
                 throw new InvalidOperationException("The specified herd does not belong to this farm.");
+
+            if (herd.Status == HerdStatus.Inactive)
+                throw new InvalidOperationException("Cannot add animals to an inactive herd.");
 
             if (_animals.Any(a => a.AnimalCode == animalCode))
                 throw new InvalidOperationException("An animal with the same code already exists in this farm.");
