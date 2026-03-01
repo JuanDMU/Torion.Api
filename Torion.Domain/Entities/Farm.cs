@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using Torion.Domain.Base;
 using Torion.Domain.Enumerations;
 using Torion.Domain.ValueObjects;
@@ -9,67 +9,93 @@ namespace Torion.Domain.Entities
 {
     public sealed class Farm : BaseEntity
     {
-        public int UserId { get; private set; }
+        private readonly List<Herd> _herds = new();
+        private readonly List<Animal> _animals = new();
+
+        public int OwnerId { get; private set; }
 
         public FarmCode FarmCode { get; private set; } = default!;
 
-        public string Name { get; private set; } = default!;
+        public string Name { get; private set; } = string.Empty;
 
         public string? Location { get; private set; }
 
-        public string? Description { get; private set; }
+        public IReadOnlyCollection<Herd> Herds => _herds.AsReadOnly();
 
-        public FarmStatus Status { get; private set; }
+        public IReadOnlyCollection<Animal> Animals => _animals.AsReadOnly();
 
-        private Farm() { } // Required for EF Core
+        private Farm() { } // EF Core
 
-        private Farm(int userId, FarmCode farmCode, string name, string? location, string? description)
+        private Farm(int ownerId, FarmCode farmCode, string name, string? location)
         {
-            if (userId <= 0)
-                throw new ArgumentException("UserId must be valid.");
+            if (ownerId <= 0)
+                throw new ArgumentException("OwnerId must be valid.");
 
-            UserId = userId;
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Farm name is required.");
+
+            OwnerId = ownerId;
             FarmCode = farmCode;
-
-            SetName(name);
-            Location = location?.Trim(); // If location is provided, trim it
-            Description = description?.Trim();
-
-            Status = FarmStatus.Active;
-        }
-
-        public static Farm Create(int userId, FarmCode farmCode, string name, string? location, string? description)
-        {
-            return new Farm(userId, farmCode, name, location, description);
-        }
-
-        public void UpdateDetails(string name, string? location, string? description)
-        {
-            SetName(name);
+            Name = name.Trim();
             Location = location?.Trim();
-            Description = description?.Trim();
-
-            SetUpdated();
         }
 
-        public void Deactivate()
+        public static Farm Create(int ownerId, FarmCode farmCode, string name, string? location)
         {
-            if (Status == FarmStatus.Inactive)
-                throw new InvalidOperationException("Farm is already inactive.");
-
-            Status = FarmStatus.Inactive;
-            SetUpdated();
+            return new Farm(ownerId, farmCode, name, location);
         }
 
-        private void SetName(string name)
+        public Herd AddHerd(string name, string? description)
+        {
+            if (_herds.Any(h => h.Name.ToLower() == name.ToLower()))
+                throw new InvalidOperationException("A herd with the same name already exists in this farm.");
+
+            var herd = Herd.Create(Id, name, description);
+
+            _herds.Add(herd);
+
+            SetUpdated();
+
+            return herd;
+        }
+
+        public Animal AddAnimal(
+            int herdId,
+            AnimalCode animalCode,
+            Gender gender,
+            Weight initialWeight,
+            DateTime admissionDate)
+        {
+            if (!_herds.Any(h => h.Id == herdId))
+                throw new InvalidOperationException("The specified herd does not belong to this farm.");
+
+            if (_animals.Any(a => a.AnimalCode == animalCode))
+                throw new InvalidOperationException("An animal with the same code already exists in this farm.");
+
+            var animal = Animal.Create(
+                Id,
+                herdId,
+                animalCode,
+                gender,
+                initialWeight,
+                admissionDate);
+
+            _animals.Add(animal);
+
+            SetUpdated();
+
+            return animal;
+        }
+
+        public void UpdateDetails(string name, string? location)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Farm name cannot be empty.");
-
-            if (name.Trim().Length < 3)
-                throw new ArgumentException("Farm name must be at least 3 characters.");
+                throw new ArgumentException("Farm name is required.");
 
             Name = name.Trim();
+            Location = location?.Trim();
+
+            SetUpdated();
         }
     }
 }
